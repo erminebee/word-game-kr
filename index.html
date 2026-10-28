@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="theme-color" content="#ffffff">
+  <title>한글 단어 맞추기</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app-container">
+    
+    <!-- 1. 홈 화면 (Home View) -->
+    <div id="home-view" class="view">
+      <div class="home-header">
+        <h1 class="home-title">한글 단어 맞추기</h1>
+        <p class="home-subtitle">자모를 풀어서 맞히는 단어 게임</p>
+      </div>
+
+      <div class="home-menu">
+        <button class="menu-btn mode-btn" data-length="5">5자리</button>
+        <button class="menu-btn mode-btn" data-length="6">6자리</button>
+        <button class="menu-btn mode-btn" data-length="7">7자리</button>
+        <button class="menu-btn mode-btn" data-length="8">8자리</button>
+        
+        <div class="menu-divider"></div>
+        <button id="btn-home-all-stats" class="menu-btn stats-menu-btn">누적 결과</button>
+      </div>
+    </div>
+
+    <!-- 2. 게임 플레이 화면 (Game View) -->
+    <div id="game-view" class="view hidden">
+      <!-- 헤더 -->
+      <header class="game-header">
+        <button id="btn-header-back" class="icon-btn" aria-label="뒤로가기">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h1 class="header-title" id="header-title">5자리 단어</h1>
+        <button id="btn-header-more" class="icon-btn" aria-label="메뉴">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+            <circle cx="5" cy="12" r="2"></circle>
+            <circle cx="12" cy="12" r="2"></circle>
+            <circle cx="19" cy="12" r="2"></circle>
+          </svg>
+        </button>
+      </header>
+
+      <!-- 게임 보드 (10줄 x N칸) -->
+      <main class="board-container">
+        <div id="game-board" class="game-board"></div>
+      </main>
+
+      <!-- 하단 가상 키보드 영역 -->
+      <footer class="keyboard-container">
+        <div class="keyboard-row" id="kb-row-1"></div>
+        <div class="keyboard-row" id="kb-row-2"></div>
+        <div class="keyboard-row" id="kb-row-3"></div>
+        <div class="keyboard-row submit-row">
+          <button id="btn-submit" class="submit-btn">결과보기</button>
+        </div>
+      </footer>
+    </div>
+
+    <!-- 3. 자릿수별 전체 누적 결과 화면 (All Stats View) -->
+    <div id="all-stats-view" class="view hidden">
+      <header class="game-header">
+        <button id="btn-all-stats-back" class="icon-btn" aria-label="뒤로가기">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+        </button>
+        <h1 class="header-title">누적 결과</h1>
+        <div style="width: 24px;"></div>
+      </header>
+
+      <div class="all-stats-content">
+        <!-- 5자리 통계 -->
+        <div class="all-stats-group">
+          <h2 class="all-stats-group-title">• 5자리</h2>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">누적 플레이 수: <strong id="all-stat-5-played">0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">승률: <strong id="all-stat-5-winrate">0%</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">평균 시도 횟수: <strong id="all-stat-5-avg">0.0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">현재 연승: <strong id="all-stat-5-streak">0</strong></span>
+          </div>
+        </div>
+        <hr class="stats-hr">
+
+        <!-- 6자리 통계 -->
+        <div class="all-stats-group">
+          <h2 class="all-stats-group-title">• 6자리</h2>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">누적 플레이 수: <strong id="all-stat-6-played">0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">승률: <strong id="all-stat-6-winrate">0%</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">평균 시도 횟수: <strong id="all-stat-6-avg">0.0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">현재 연승: <strong id="all-stat-6-streak">0</strong></span>
+          </div>
+        </div>
+        <hr class="stats-hr">
+
+        <!-- 7자리 통계 -->
+        <div class="all-stats-group">
+          <h2 class="all-stats-group-title">• 7자리</h2>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">누적 플레이 수: <strong id="all-stat-7-played">0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">승률: <strong id="all-stat-7-winrate">0%</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">평균 시도 횟수: <strong id="all-stat-7-avg">0.0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">현재 연승: <strong id="all-stat-7-streak">0</strong></span>
+          </div>
+        </div>
+        <hr class="stats-hr">
+
+        <!-- 8자리 통계 -->
+        <div class="all-stats-group">
+          <h2 class="all-stats-group-title">• 8자리</h2>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">누적 플레이 수: <strong id="all-stat-8-played">0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">승률: <strong id="all-stat-8-winrate">0%</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">평균 시도 횟수: <strong id="all-stat-8-avg">0.0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">현재 연승: <strong id="all-stat-8-streak">0</strong></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="all-stats-footer">
+        <button id="btn-all-stats-home" class="action-btn">홈으로</button>
+      </div>
+    </div>
+
+    <!-- 4. 결과 화면 모달/오버레이 (06, 07번 스타일) -->
+    <div id="result-modal" class="modal-overlay hidden">
+      <div class="modal-content">
+        <!-- 결과 상단 네비게이션 -->
+        <div class="result-header">
+          <button id="btn-result-close" class="icon-btn" aria-label="닫기">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- 정답 표시 -->
+        <div class="answer-section">
+          <div class="answer-label">정답은</div>
+          <div class="answer-word" id="result-answer-word">단어</div>
+        </div>
+
+        <!-- 중앙 결과 카드 (06, 07번 스타일) -->
+        <div class="result-card">
+          <!-- 06번 이미지처럼 시도 결과 사각형 블록 그리드 -->
+          <div class="result-blocks-grid" id="result-blocks-grid"></div>
+          <div class="result-status-text" id="result-status-text">성공</div>
+        </div>
+
+        <!-- 하단 통계 텍스트 영역 (07번 스타일) -->
+        <div class="stats-section">
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">누적 플레이 수: <strong id="stat-played">0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">승률: <strong id="stat-win-rate">0%</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">평균 시도 횟수: <strong id="stat-avg-guesses">0.0</strong></span>
+          </div>
+          <div class="stat-line">
+            <span class="stat-bullet">•</span>
+            <span class="stat-label">현재 연승: <strong id="stat-current-streak">0</strong></span>
+          </div>
+        </div>
+
+        <!-- 최하단 2개 버튼 (07번 이미지 버튼 디자인 재현) -->
+        <div class="result-actions">
+          <button id="btn-next-game" class="action-btn">다음 문제 도전</button>
+          <button id="btn-go-home" class="action-btn">홈으로 이동</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 토스트 알림 메시지 -->
+    <div id="toast" class="toast hidden"></div>
+  </div>
+
+  <script src="words.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
