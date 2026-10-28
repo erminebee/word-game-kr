@@ -281,6 +281,17 @@ html, body {
   gap: 3px;
 }
 
+/* 행 흔들림 애니메이션 (사전에 없는 단어일 때) */
+.board-row.shake {
+  animation: shakeRow 0.5s ease-in-out;
+}
+
+@keyframes shakeRow {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
 /* 글자 입력 상태 */
 .board-tile.pop {
   transform: scale(1.08);

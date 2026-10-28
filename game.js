@@ -27,6 +27,9 @@ class WordGame {
     // 통계 로드 (새로운 키로 완전 초기화)
     this.stats = this.loadStats();
 
+    // 사전 검사용 Set 초기화
+    this.initDictSets();
+
     // DOM 캐싱
     this.homeView = document.getElementById('home-view');
     this.gameView = document.getElementById('game-view');
@@ -78,6 +81,48 @@ class WordGame {
     } catch (e) {
       console.warn('LocalStorage save error:', e);
     }
+  }
+
+  // 사전 검사용 고속 조회 Set 초기화
+  initDictSets() {
+    this.validDictSets = {};
+    const dictSource = (typeof VALID_JAMO_DICT !== 'undefined' ? VALID_JAMO_DICT : (window.VALID_JAMO_DICT || {}));
+
+    for (const len of [5, 6, 7, 8]) {
+      if (dictSource[len] && Array.isArray(dictSource[len])) {
+        this.validDictSets[len] = new Set(dictSource[len]);
+      } else {
+        this.validDictSets[len] = new Set();
+      }
+
+      // GAME_WORDS에 있는 단어들도 확실히 포함
+      const words = (typeof GAME_WORDS !== 'undefined' ? GAME_WORDS : (window.GAME_WORDS || {}))[len];
+      if (words && Array.isArray(words)) {
+        words.forEach(item => {
+          this.validDictSets[len].add(item.jamo.join(''));
+        });
+      }
+    }
+  }
+
+  // 단어 유효성 검사 (사전 등재 여부)
+  isValidWord(guessStr) {
+    const set = this.validDictSets[this.currentMode];
+    if (!set || set.size === 0) return true; // 비상 fallback
+    return set.has(guessStr);
+  }
+
+  // 행 흔들림 애니메이션 (사전에 없는 단어일 때)
+  shakeCurrentRow() {
+    const rowEl = this.getRowEl(this.currentRow);
+    if (!rowEl) return;
+    rowEl.classList.remove('shake');
+    // 브라우저 리플로우 강제
+    void rowEl.offsetWidth;
+    rowEl.classList.add('shake');
+    setTimeout(() => {
+      rowEl.classList.remove('shake');
+    }, 500);
   }
 
   // DOM 이벤트 초기화
@@ -323,6 +368,15 @@ class WordGame {
     }
 
     const guess = this.boardState[this.currentRow];
+    const guessStr = guess.join('');
+
+    // 사전 검사 (정통 워들 방식)
+    if (!this.isValidWord(guessStr)) {
+      this.showToast('사전에 없는 단어입니다');
+      this.shakeCurrentRow();
+      return; // 시도 횟수 차감 없이 재입력 가능!
+    }
+
     const target = this.target.jamo;
 
     const evaluation = this.evaluateGuess(guess, target);
